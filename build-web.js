@@ -25,25 +25,31 @@ const version = `${now.getFullYear()}.${pad(now.getMonth() + 1)}${pad(now.getDat
 
 const launcher = read("dev/launcher.js");
 
-const userscript = `// ==UserScript==
+// Metadata block, shared by the script and the small .meta.js file that
+// userscript managers download to check for a newer version.
+const meta = `// ==UserScript==
 // @name         X araçları
 // @namespace    ${SITE}
 // @version      ${version}
-// @description  Takip etmeyenler ve etkileşim raporu. x.com'da sol alttaki düğmeden açılır. / Unfollowers and engagement report for X.
+// @description  Etkileşim çemberi ve takip etmeyenler. x.com'da sol alttaki düğmeden açılır. / Engagement circle and unfollowers for X.
 // @author       anilcolakk
 // @homepageURL  ${SITE}
 // @downloadURL  ${SITE}/x-araclari.user.js
-// @updateURL    ${SITE}/x-araclari.user.js
+// @updateURL    ${SITE}/x-araclari.meta.js
 // @match        https://x.com/*
 // @match        https://mobile.x.com/*
 // @match        https://twitter.com/*
 // @match        https://mobile.twitter.com/*
 // @grant        none
-// @inject-into  page
+// @inject-into  auto
 // @run-at       document-idle
 // @noframes
 // ==/UserScript==
+`;
 
+// "auto": run inside the page where allowed; where x.com's security rules block that
+// (Safari), the manager runs it in its own context instead. Both tools work in either.
+const userscript = `${meta}
 // This file holds the two tools from ${SITE} unchanged
 // (x-unfollower.js v${versionOf(tools["x-unfollower.js"])}, x-engagement.js v${versionOf(tools["x-engagement.js"])}),
 // plus a small button that starts them. Nothing runs until you tap the button.
@@ -57,9 +63,11 @@ ${tools["x-unfollower.js"]}
 ${tools["x-engagement.js"]}
     }
   };
+  const BUILD = "${version}";
 
 ${launcher.split("\n").map((line) => (line ? "  " + line : line)).join("\n")}
 })();
 `;
 fs.writeFileSync(path.join(__dirname, "docs", "x-araclari.user.js"), userscript);
+fs.writeFileSync(path.join(__dirname, "docs", "x-araclari.meta.js"), meta);
 console.log(`docs/x-araclari.user.js  ${version}  ${Math.round(userscript.length / 1024)} KB`);

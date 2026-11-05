@@ -1,18 +1,18 @@
 // ==UserScript==
 // @name         X araçları
 // @namespace    https://anilcolakk.github.io
-// @version      2026.1105.2304
-// @description  Takip etmeyenler ve etkileşim raporu. x.com'da sol alttaki düğmeden açılır. / Unfollowers and engagement report for X.
+// @version      2026.1105.2339
+// @description  Etkileşim çemberi ve takip etmeyenler. x.com'da sol alttaki düğmeden açılır. / Engagement circle and unfollowers for X.
 // @author       anilcolakk
 // @homepageURL  https://anilcolakk.github.io
 // @downloadURL  https://anilcolakk.github.io/x-araclari.user.js
-// @updateURL    https://anilcolakk.github.io/x-araclari.user.js
+// @updateURL    https://anilcolakk.github.io/x-araclari.meta.js
 // @match        https://x.com/*
 // @match        https://mobile.x.com/*
 // @match        https://twitter.com/*
 // @match        https://mobile.twitter.com/*
 // @grant        none
-// @inject-into  page
+// @inject-into  auto
 // @run-at       document-idle
 // @noframes
 // ==/UserScript==
@@ -5607,6 +5607,7 @@
 
     }
   };
+  const BUILD = "2026.1105.2339";
 
   // Small round button on x.com that opens a menu with the two tools.
   // Included in docs/x-araclari.user.js by build-web.js; TOOLS is defined there.
@@ -5615,8 +5616,8 @@
 
   const tr = /^tr/i.test(navigator.language || "");
   const L = tr
-    ? { open: "X araçları", unfollower: "Takip etmeyenler", engagement: "Etkileşim çemberi", hide: "Düğmeyi gizle" }
-    : { open: "X tools", unfollower: "Unfollowers", engagement: "Engagement circle", hide: "Hide button" };
+    ? { open: "X araçları", unfollower: "Takip etmeyenler", engagement: "Etkileşim çemberi", hide: "Düğmeyi gizle", inPage: "sayfa içinde", separate: "ayrı alanda" }
+    : { open: "X tools", unfollower: "Unfollowers", engagement: "Engagement circle", hide: "Hide button", inPage: "in page", separate: "separate context" };
 
   const css = `
   #xa-launch, #xa-launch * { box-sizing: border-box; }
@@ -5628,6 +5629,7 @@
   #xa-launch .xa-menu button { all: unset; cursor: pointer; padding: 12px 14px; border-radius: 10px; color: #e7e9ea; font: 600 15px -apple-system, "Segoe UI", Roboto, sans-serif; }
   #xa-launch .xa-menu button:hover, #xa-launch .xa-menu button:focus-visible { background: rgba(255,255,255,0.08); }
   #xa-launch .xa-menu .xa-hide { color: #8b98a5; font-weight: 500; font-size: 13px; }
+  #xa-launch .xa-status { padding: 6px 14px 4px; color: #5b6168; font: 500 11px ui-monospace, Menlo, monospace; border-top: 1px solid rgba(255,255,255,0.08); margin-top: 2px; }
   `;
 
   function mountLauncher() {
@@ -5643,6 +5645,7 @@
         <button type="button" role="menuitem" data-tool="unfollower"></button>
         <button type="button" role="menuitem" data-tool="engagement"></button>
         <button type="button" role="menuitem" class="xa-hide" data-hide></button>
+        <div class="xa-status" data-status></div>
       </div>
       <button type="button" class="xa-dot" aria-haspopup="menu" aria-expanded="false">
         <svg viewBox="0 0 64 64" width="26" height="26" aria-hidden="true"><circle cx="32" cy="32" r="24" fill="none" stroke="#8b98a5" stroke-width="4" stroke-dasharray="5 6"/><circle cx="32" cy="32" r="14" fill="none" stroke="#ffd400" stroke-width="4.5"/><circle cx="32" cy="32" r="6" fill="#fff"/></svg>
@@ -5654,6 +5657,11 @@
     root.querySelector('[data-tool="unfollower"]').textContent = L.unfollower;
     root.querySelector('[data-tool="engagement"]').textContent = L.engagement;
     root.querySelector("[data-hide]").textContent = L.hide;
+    // Version and where the script runs, so a screenshot of the menu is enough to debug a phone.
+    // "page": inside x.com's page; "separate": the userscript app's own context (Safari often).
+    const inPage = typeof window.webpackChunk_twitter_responsive_web !== "undefined";
+    const build = typeof BUILD === "string" ? BUILD : "dev";
+    root.querySelector("[data-status]").textContent = `${build} · ${inPage ? L.inPage : L.separate}`;
     const setOpen = (open) => {
       menu.hidden = !open;
       dot.setAttribute("aria-expanded", String(open));
