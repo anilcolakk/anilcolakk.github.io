@@ -84,6 +84,7 @@
   .copy-big {
     font: 600 16px var(--sans); color: var(--bg); background: var(--fg);
     border: 0; border-radius: 10px; padding: 12px 22px; cursor: pointer;
+    display: inline-block; text-decoration: none;
   }
   .copy-big:hover { opacity: 0.88; }
   .copy-big.done { background: #12a56b; color: #fff; }
@@ -165,6 +166,7 @@
   <nav class="tabs" role="tablist" aria-label="Araçlar">
     <button class="tab" role="tab" id="tab-takip" aria-controls="takip" aria-selected="true" data-tab="takip">Takip etmeyenler</button>
     <button class="tab" role="tab" id="tab-rapor" aria-controls="rapor" aria-selected="false" data-tab="rapor">Etkileşim raporu</button>
+    <button class="tab" role="tab" id="tab-telefon" aria-controls="telefon" aria-selected="false" data-tab="telefon">Telefonda</button>
   </nav>
 
   <!-- ===================== Takip etmeyenler ===================== -->
@@ -282,16 +284,72 @@
     </section>
   </section>
 
+  <!-- ===================== Telefonda ===================== -->
+  <section class="panel" id="telefon" role="tabpanel" aria-labelledby="tab-telefon" hidden>
+    <div class="info">
+      <div class="intro">
+        <h1>Telefonda kullan</h1>
+        <p>Telefon tarayıcılarında konsol yok. Bunun yerine ücretsiz bir "userscript" uygulaması bir kez kurulur. Sonra x.com'u her açtığında sol altta küçük bir düğme çıkar; iki araç da oradan açılır.</p>
+        <div class="copy-row">
+          <a class="copy-big" href="x-araclari.user.js">Telefona yükle</a>
+          <span class="meta" data-meta="telefon">iki araç tek dosyada</span>
+        </div>
+      </div>
+
+      <div>
+        <h2>iPhone (Safari)</h2>
+        <ol class="steps">
+          <li><span>App Store'dan ücretsiz <b>Userscripts</b> uygulamasını indir.<small>Açık kaynak bir uygulama: <a href="https://github.com/quoid/userscripts" target="_blank" rel="noopener">github.com/quoid/userscripts</a></small></span></li>
+          <li><span><b>Ayarlar → Safari → Uzantılar → Userscripts</b>'i aç ve web sitelerine izin ver.</span></li>
+          <li><span>Bu sayfayı Safari'de aç ve yukarıdaki <b>Telefona yükle</b>'ye dokun. Açılan kod sayfasında adres çubuğundaki uzantı simgesine dokun, <b>Userscripts</b>'i seç ve <b>Install</b>'a bas.</span></li>
+          <li><span>Safari'de x.com'u aç. Sol altta yuvarlak bir düğme çıkar, ona dokun ve aracı seç.</span></li>
+        </ol>
+      </div>
+
+      <div>
+        <h2>Android (Firefox)</h2>
+        <ol class="steps">
+          <li><span>Play Store'dan <b>Firefox</b>'u indir.<small>Android'de Chrome userscript desteklemiyor.</small></span></li>
+          <li><span>Firefox menüsünden <b>Eklentiler</b>'e gir ve <b>Tampermonkey</b> ya da <b>Violentmonkey</b>'i ekle.</span></li>
+          <li><span>Bu sayfayı Firefox'ta aç ve <b>Telefona yükle</b>'ye dokun. Açılan ekranda <b>Yükle / Install</b>'a bas.</span></li>
+          <li><span>Firefox'ta x.com'u aç. Sol altta yuvarlak bir düğme çıkar, ona dokun ve aracı seç.</span></li>
+        </ol>
+      </div>
+
+      <div>
+        <h2>Bilmen gerekenler</h2>
+        <ul class="list">
+          <li>Dosyada diğer sekmelerdeki iki kod aynen var, yanında sadece başlatma düğmesi var. Sen düğmeye dokunmadan hiçbir şey çalışmaz.</li>
+          <li>Kurduğun uygulama yeni sürümleri kendisi kontrol eder; kodu tekrar yüklemen gerekmez.</li>
+          <li>Düğmeyi o an istemiyorsan menüdeki <b>Düğmeyi gizle</b> ile sayfa yenilenene kadar kaldırabilirsin.</li>
+          <li>Aynı dosya bilgisayarda da çalışır (Chrome veya Edge + Tampermonkey); her seferinde konsola yapıştırmak istemeyenler için.</li>
+        </ul>
+      </div>
+
+      <div class="warn"><b>Deneysel:</b> Telefon yöntemi bilgisayardaki kadar denenmedi. Bir şey çalışmazsa bilgisayardan konsol yöntemini kullan. Ekranda çıkan hata mesajını paylaşırsan düzeltmeye çalışırım.</div>
+    </div>
+
+    <aside class="editor" aria-label="Kurulan dosya">
+      <div class="ed-bar">
+        <div class="ed-file">x-araclari.user.js <span data-lines="telefon"></span></div>
+        <div class="ed-actions">
+          <a class="ed-btn primary" href="x-araclari.user.js">Aç</a>
+        </div>
+      </div>
+      <pre tabindex="0"><code class="language-javascript" data-code="telefon">Kod yükleniyor…</code></pre>
+    </aside>
+  </section>
+
   <footer>
     <p>Kodlar bu sitede durur ve tarayıcında çalışır. Bu siteye ya da başka bir yere hiçbir veri gönderilmez.</p>
-    <p>Telefonda çalışmaz; bilgisayarda Chrome, Edge, Firefox ya da Safari gerekir. Panellerin dili Türkçe ve İngilizce.</p>
+    <p>Bilgisayarda Chrome, Edge, Firefox ya da Safari ile çalışır; telefon için <a href="#telefon">Telefonda</a> sekmesine bak. Panellerin dili Türkçe ve İngilizce.</p>
   </footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
 <script>
   (function () {
-    var FILES = { takip: "x-unfollower.js", rapor: "x-engagement.js" };
+    var FILES = { takip: "x-unfollower.js", rapor: "x-engagement.js", telefon: "x-araclari.user.js" };
     var sources = {};
     var highlighted = {};
 
@@ -300,6 +358,7 @@
       fetch(FILES[key], { cache: "no-cache" })
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
         .then(function (text) {
+          if (key === "telefon") return showUserscript(text);
           sources[key] = text;
           var version = (/const VERSION = "([^"]+)"/.exec(text) || [])[1];
           var lines = text.split("\n").length.toLocaleString("tr-TR");
@@ -314,6 +373,17 @@
           document.querySelector('[data-meta="' + key + '"]').textContent = "";
         });
     });
+
+    // Telefon dosyası iki aracın kodunu aynen içerir; burada sadece başlığı gösterilir.
+    function showUserscript(text) {
+      var head = text.split("\n(() => {")[0];
+      var version = (/@version\s+(\S+)/.exec(text) || [])[1];
+      sources.telefon = head + "\n\n// … ardından iki aracın kodu (Takip etmeyenler ve Etkileşim raporu sekmelerindekiyle aynı)\n// ve x.com'da sol alttaki başlatma düğmesi.\n";
+      document.querySelector('[data-code="telefon"]').textContent = sources.telefon;
+      document.querySelector('[data-lines="telefon"]').textContent = "· " + Math.round(new Blob([text]).size / 1024) + " KB";
+      if (version) document.querySelector('[data-meta="telefon"]').textContent = "sürüm " + version + " · iki araç tek dosyada";
+      if (!document.getElementById("telefon").hidden) highlight("telefon");
+    }
 
     // Renklendirme büyük kodda biraz sürer; sadece açık sekme için yapılır.
     function highlight(key) {
@@ -343,7 +413,9 @@
       });
       tab.addEventListener("keydown", function (e) {
         if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
-        var next = tab.getAttribute("data-tab") === "takip" ? "rapor" : "takip";
+        var keys = Object.keys(FILES);
+        var i = keys.indexOf(tab.getAttribute("data-tab"));
+        var next = keys[(i + (e.key === "ArrowRight" ? 1 : keys.length - 1)) % keys.length];
         history.replaceState(null, "", "#" + next);
         show(next, true);
       });

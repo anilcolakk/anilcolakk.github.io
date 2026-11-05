@@ -1,7 +1,7 @@
 # X araçları
 
 **Site: https://anilcolakk.github.io** — iki araç, kısa anlatım ve kopyalanabilir kod.
-The site lives in `docs/` (GitHub Pages). After changing a script, run `node build-web.js` to copy it into `docs/`.
+The site lives in `docs/` (GitHub Pages). After changing a script, run `node build-web.js`: it copies both tools into `docs/` and builds `docs/x-araclari.user.js`, a userscript with both tools and a small launcher button (`dev/launcher.js`) for phones (Userscripts on iPhone Safari, Tampermonkey / Violentmonkey on Android Firefox).
 
 # X Unfollower
 

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="tr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone test</title>
+<body style="margin:0;background:#000;color:#e7e9ea;font:15px sans-serif;min-height:100vh">
+<p style="padding:16px">Fake x.com page for checking the launcher and panels at phone size (localhost only).</p>
+<script>
+  // Loads the built userscript, lets the tools run on localhost (their x.com check
+  // is switched off here only), and runs it like a userscript manager would.
+  fetch("../docs/x-araclari.user.js").then((r) => r.text()).then((code) => {
+    code = code.split("if (!IS_TEST && !/(^|\\.)(x|twitter)\\.com$/.test(location.hostname)) {").join("if (false) {");
+    window.__alerts = [];
+    window.alert = (m) => window.__alerts.push(m);
+    (0, eval)(code);
+  });
+</script>
+</body>
+</html>

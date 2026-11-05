@@ -8,7 +8,7 @@
   }
 
   const APP_ID = "xe-app";
-  const VERSION = "1.1.1";
+  const VERSION = "1.1.2";
   const CLEANUP_EVENT = "xe-cleanup";
   const STYLE_ID = "xe-style";
   const STORAGE_KEY = "xe_state_v1";
@@ -828,7 +828,18 @@
     window.fetch = wrappedFetch;
     XMLHttpRequest.prototype.open = wrappedOpen;
     XMLHttpRequest.prototype.setRequestHeader = wrappedSetHeader;
-    spy = { originalFetch, originalOpen, originalSetHeader, wrappedFetch, wrappedOpen, wrappedSetHeader };
+    // Also listen to the browser's own request log. This works even when a phone
+    // userscript app runs the panel apart from x.com's code, where the wrappers above see nothing.
+    let observer = null;
+    try {
+      observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          try { recordRequest(entry.name); } catch { }
+        }
+      });
+      observer.observe({ type: "resource" });
+    } catch { observer = null; }
+    spy = { originalFetch, originalOpen, originalSetHeader, wrappedFetch, wrappedOpen, wrappedSetHeader, observer };
   }
 
   function removeRequestSpy() {
@@ -836,6 +847,7 @@
     if (window.fetch === spy.wrappedFetch) window.fetch = spy.originalFetch;
     if (XMLHttpRequest.prototype.open === spy.wrappedOpen) XMLHttpRequest.prototype.open = spy.originalOpen;
     if (XMLHttpRequest.prototype.setRequestHeader === spy.wrappedSetHeader) XMLHttpRequest.prototype.setRequestHeader = spy.originalSetHeader;
+    try { spy.observer?.disconnect(); } catch { }
     spy = null;
   }
 
