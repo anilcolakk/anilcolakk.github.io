@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>X araçları — takip etmeyenler ve etkileşim raporu</title>
-<meta name="description" content="X (Twitter) için iki küçük araç: seni geri takip etmeyenleri bul, kimin en çok etkileştiğini gör. Uygulama, eklenti veya şifre yok; kodu tarayıcı konsoluna yapıştırıyorsun.">
+<title>X araçları — etkileşim çemberi ve takip etmeyenler</title>
+<meta name="description" content="X (Twitter) için iki küçük araç: en çok etkileştiğin kişilerden çemberini çıkar, seni geri takip etmeyenleri bul. Uygulama, eklenti veya şifre yok; kodu tarayıcı konsoluna yapıştırıyorsun.">
 <meta property="og:title" content="X araçları">
-<meta property="og:description" content="Seni geri takip etmeyenleri bul, en çok etkileşenlerini gör. Uygulama, eklenti, şifre yok.">
+<meta property="og:description" content="X çemberini çıkar, seni geri takip etmeyenleri bul. Uygulama, eklenti, şifre yok.">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#f7f6f2">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -153,97 +153,86 @@
     h1 { font-size: 25px; }
     .editor { height: 60vh; }
   }
+
+  .top-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .top-links { display: flex; align-items: center; gap: 14px; font-size: 14px; }
+  .top-links a { color: var(--muted); text-decoration: none; }
+  .top-links a:hover { color: var(--fg); text-decoration: underline; }
+  .share { font: 600 13px var(--sans); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+  .share:hover { border-color: var(--fg); }
+  .phone-note { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 14px; margin-bottom: 14px; padding: 12px 14px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); font-size: 15px; }
+  .phone-note[hidden] { display: none; }
+  .phone-note a { font-weight: 600; text-decoration: none; }
+  .copy-plain { font: 600 15px var(--sans); color: var(--fg); background: none; border: 1px solid var(--line); border-radius: 10px; padding: 11px 16px; cursor: pointer; }
+  .copy-plain:hover { border-color: var(--fg); }
+  .copy-plain.done { border-color: #12a56b; color: #12a56b; }
+  .intro .meta { margin-top: -4px; }
+  .keys kbd { font-size: 0.8em; white-space: nowrap; }
+  .steps li.now::before { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .steps li.now > span { font-weight: 600; }
+  .steps li.now small { font-weight: 400; }
+  @media (max-width: 600px) { .tabs { gap: 0; } .tab { padding: 12px 6px 11px; font-size: 14px; } }
+  .done-note { margin-top: 12px; padding: 10px 12px; border-left: 3px solid var(--accent); background: var(--surface); font-size: 15px; }
+  .os-switch { display: inline-flex; align-self: flex-start; padding: 3px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); }
+  .os-switch button { border: 0; background: none; padding: 6px 16px; border-radius: 999px; font: 600 14px var(--sans); color: var(--muted); cursor: pointer; }
+  .os-switch button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+  .faq { border-top: 1px solid var(--line); padding: 28px 0 8px; max-width: 760px; }
+  .faq h2 { font-size: 19px; margin-bottom: 8px; }
+  .faq details { border-bottom: 1px solid var(--line); }
+  .faq summary { cursor: pointer; padding: 14px 0; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; font: 500 18px var(--mono); color: var(--muted); }
+  .faq details[open] summary::after { content: "–"; }
+  .faq details p { padding: 0 0 16px; color: var(--muted); }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <a class="brand" href="./">x araçları<span> / konsol için</span></a>
+    <div class="top-row">
+      <a class="brand" href="./">x araçları<span> / konsol için</span></a>
+      <div class="top-links">
+        <a href="https://github.com/anilcolakk/anilcolakk.github.io" target="_blank" rel="noopener">Kaynak kod</a>
+        <button type="button" class="share" data-share>X'te paylaş</button>
+      </div>
+    </div>
     <p class="lead">X (Twitter) için iki küçük araç. Bir kodu kopyalayıp x.com'da tarayıcının konsoluna yapıştırıyorsun, o kadar. <b>Uygulama, eklenti ya da şifre yok.</b></p>
     <div class="badges"><span>ücretsiz</span><span>giriş istemez</span><span>veri bir yere gitmez</span><span>kod açık</span></div>
   </header>
 
+  <div class="phone-note" data-phone-note hidden>
+    <span>Telefondasın. Konsol yöntemi telefonda çalışmaz; telefon için ayrı bir kurulum var.</span>
+    <a href="#telefon">Telefonda kullan →</a>
+  </div>
+
   <nav class="tabs" role="tablist" aria-label="Araçlar">
-    <button class="tab" role="tab" id="tab-takip" aria-controls="takip" aria-selected="true" data-tab="takip">Takip etmeyenler</button>
-    <button class="tab" role="tab" id="tab-rapor" aria-controls="rapor" aria-selected="false" data-tab="rapor">Etkileşim raporu</button>
+    <button class="tab" role="tab" id="tab-cember" aria-controls="cember" aria-selected="true" data-tab="cember">Etkileşim çemberi</button>
+    <button class="tab" role="tab" id="tab-takip" aria-controls="takip" aria-selected="false" data-tab="takip">Takip etmeyenler</button>
     <button class="tab" role="tab" id="tab-telefon" aria-controls="telefon" aria-selected="false" data-tab="telefon">Telefonda</button>
   </nav>
 
-  <!-- ===================== Takip etmeyenler ===================== -->
-  <section class="panel" id="takip" role="tabpanel" aria-labelledby="tab-takip">
+  <!-- ===================== Etkileşim çemberi ===================== -->
+  <section class="panel" id="cember" role="tabpanel" aria-labelledby="tab-cember">
     <div class="info">
       <div class="intro">
-        <h1>Seni geri takip etmeyenler</h1>
-        <p>Takip ettiğin ama seni takip etmeyen hesapları tek listede gösterir. İstersen seçtiklerini yavaşça takipten çıkarır.</p>
+        <h1>Etkileşim çemberi</h1>
+        <p>Son gönderilerinle en çok kimin etkileştiğini bulur ve bunu paylaşmalık bir çember görseline çevirir. Hiç etkileşmeyen takipçilerini ve en iyi paylaşım saatini de gösterir.</p>
         <div class="copy-row">
-          <button type="button" class="copy-big" data-copy="takip">Kodu kopyala</button>
-          <span class="meta" data-meta="takip">yükleniyor…</span>
+          <button type="button" class="copy-big" data-go="cember">Kopyala ve x.com'u aç</button>
+          <button type="button" class="copy-plain" data-copy="cember">Sadece kopyala</button>
         </div>
+        <span class="meta" data-meta="cember">yükleniyor…</span>
       </div>
 
       <div>
         <h2>Nasıl kullanılır</h2>
-        <ol class="steps">
-          <li><span>Bilgisayarda <a href="https://x.com" target="_blank" rel="noopener">x.com</a>'u aç ve hesabına giriş yap.</span></li>
-          <li><span>Bu sayfada <b>Kodu kopyala</b>'ya bas.</span></li>
-          <li><span>x.com sekmesinde <kbd>F12</kbd>'ye bas ve <b>Console</b> sekmesine geç.<small>Mac'te <kbd>Cmd</kbd> + <kbd>Option</kbd> + <kbd>J</kbd>. Chrome yapıştırmaya izin vermezse önce <code>allow pasting</code> yazıp Enter'a bas.</small></span></li>
-          <li><span>Kodu yapıştır ve Enter'a bas. Sağ altta bir panel açılır, <b>Taramayı başlat</b>'a bas.</span></li>
+        <ol class="steps" data-steps="cember">
+          <li><span>Bilgisayarda <a href="https://x.com" target="_blank" rel="noopener">x.com</a>'a giriş yapmış ol.</span></li>
+          <li><span><b>Kopyala ve x.com'u aç</b>'a bas. Kod panoya kopyalanır, x.com yeni sekmede açılır.</span></li>
+          <li data-step-console><span>x.com sekmesinde konsolu aç: <span class="keys" data-keys></span><small data-keys-note></small></span></li>
+          <li><span>Kodu yapıştır, Enter'a bas. Açılan panelde <b>Raporu oluştur</b>'a bas.<small>Panel "Bir adım gerekiyor" derse, söylediği sayfayı aynı sekmede aç; kendiliğinden devam eder.</small></span></li>
         </ol>
-      </div>
-
-      <div>
-        <h2>Ne yapar</h2>
-        <ul class="list">
-          <li>Takip ettiğin herkesi kontrol eder, seni takip etmeyenleri listeler.</li>
-          <li>Listede arayabilir, onaylı / korumalı / fotoğrafsız hesapları süzebilirsin.</li>
-          <li>İstersen seçtiklerini takipten çıkarır: her hesap arasında 6–10 saniye, her 10 hesapta 5 dakika mola verir.</li>
-        </ul>
-      </div>
-
-      <div>
-        <h2>Güvenli mi?</h2>
-        <ul class="list">
-          <li>Şifreni istemez. Zaten açık olan X oturumunu kullanır, sadece x.com ile konuşur.</li>
-          <li>X'in hız sınırına yaklaşınca kendiliğinden bekler. Yarıda kalırsa kaldığı yerden devam eder.</li>
-          <li>Tarama hesabında hiçbir şeyi değiştirmez. Takipten çıkarma sadece sen onaylarsan başlar.</li>
-        </ul>
-      </div>
-
-      <div class="warn"><b>Bilmen gereken:</b> Kod X'in resmi olmayan web arayüzünü kullanır. Çok sayıda hesabı kısa sürede takipten çıkarmak hesabının geçici olarak kısıtlanmasına yol açabilir; varsayılan hızları düşürme. Konsola okumadığın bir kodu yapıştırma: bu kodun tamamı sağda.</div>
-    </div>
-
-    <section class="editor" aria-label="x-unfollower.js kodu">
-      <div class="ed-bar">
-        <div class="ed-file">x-unfollower.js <span data-lines="takip"></span></div>
-        <div class="ed-actions">
-          <a class="ed-btn" href="x-unfollower.js" download>İndir</a>
-          <button type="button" class="ed-btn primary" data-copy="takip">Kopyala</button>
-        </div>
-      </div>
-      <pre tabindex="0"><code class="language-javascript" data-code="takip">Kod yükleniyor…</code></pre>
-    </section>
-  </section>
-
-  <!-- ===================== Etkileşim raporu ===================== -->
-  <section class="panel" id="rapor" role="tabpanel" aria-labelledby="tab-rapor" hidden>
-    <div class="info">
-      <div class="intro">
-        <h1>Etkileşim raporu ve X çemberin</h1>
-        <p>Son gönderilerinle en çok kimin etkileştiğini bulur, bunu paylaşmalık bir çember görseline çevirir. Hiç etkileşmeyen takipçilerini ve en iyi paylaşım saatini de gösterir.</p>
-        <div class="copy-row">
-          <button type="button" class="copy-big" data-copy="rapor">Kodu kopyala</button>
-          <span class="meta" data-meta="rapor">yükleniyor…</span>
-        </div>
-      </div>
-
-      <div>
-        <h2>Nasıl kullanılır</h2>
-        <ol class="steps">
-          <li><span>Bilgisayarda <a href="https://x.com" target="_blank" rel="noopener">x.com</a>'u aç ve hesabına giriş yap.</span></li>
-          <li><span>Bu sayfada <b>Kodu kopyala</b>'ya bas.</span></li>
-          <li><span>x.com sekmesinde <kbd>F12</kbd>'ye bas ve <b>Console</b> sekmesine geç.<small>Mac'te <kbd>Cmd</kbd> + <kbd>Option</kbd> + <kbd>J</kbd>. Chrome yapıştırmaya izin vermezse önce <code>allow pasting</code> yazıp Enter'a bas.</small></span></li>
-          <li><span>Kodu yapıştır ve Enter'a bas. Açılan panelde kaç gönderiye bakılacağını seç ve <b>Raporu oluştur</b>'a bas.<small>Panel "Bir adım gerekiyor" derse, söylediği sayfayı aynı sekmede aç; kendiliğinden devam eder.</small></span></li>
-        </ol>
+        <p class="done-note" data-done-note="cember" hidden>Kod panoda. Şimdi açılan x.com sekmesinde 3. adımdan devam et.</p>
       </div>
 
       <div>
@@ -260,27 +249,66 @@
         </figure>
       </div>
 
-      <div>
-        <h2>Güvenli mi?</h2>
-        <ul class="list">
-          <li>Sadece okur. Hesabında hiçbir şeyi değiştirmez, kimseyi takip etmez ya da beğenmez.</li>
-          <li>Şifreni istemez, sadece x.com ile konuşur. Paylaş düğmesi gönderiyi hazırlar, gönder tuşuna sen basarsın.</li>
-          <li>X'in hız sınırlarına uyar, gerekirse bekler. 100 gönderilik bir rapor genelde birkaç dakika sürer.</li>
-        </ul>
-      </div>
-
-      <div class="warn"><b>Bilmen gereken:</b> X beğenileri gizli tuttuğu için sadece kendi gönderilerini kimin beğendiğini görebilirsin. Kod X'in resmi olmayan web arayüzünü kullanır; X bir şeyi değiştirirse bir kısmı çalışmayabilir.</div>
+      <div class="warn"><b>Bilmen gereken:</b> X beğenileri gizli tuttuğu için sadece kendi gönderilerini kimin beğendiğini görebilirsin. Kod sadece okur, hesabında hiçbir şeyi değiştirmez. X'in resmi olmayan web arayüzünü kullandığı için X bir şeyi değiştirirse bir kısmı çalışmayabilir.</div>
     </div>
 
     <section class="editor" aria-label="x-engagement.js kodu">
       <div class="ed-bar">
-        <div class="ed-file">x-engagement.js <span data-lines="rapor"></span></div>
+        <div class="ed-file">x-engagement.js <span data-lines="cember"></span></div>
         <div class="ed-actions">
           <a class="ed-btn" href="x-engagement.js" download>İndir</a>
-          <button type="button" class="ed-btn primary" data-copy="rapor">Kopyala</button>
+          <button type="button" class="ed-btn primary" data-copy="cember">Kopyala</button>
         </div>
       </div>
-      <pre tabindex="0"><code class="language-javascript" data-code="rapor">Kod yükleniyor…</code></pre>
+      <pre tabindex="0"><code class="language-javascript" data-code="cember">Kod yükleniyor…</code></pre>
+    </section>
+  </section>
+
+  <!-- ===================== Takip etmeyenler ===================== -->
+  <section class="panel" id="takip" role="tabpanel" aria-labelledby="tab-takip" hidden>
+    <div class="info">
+      <div class="intro">
+        <h1>Seni geri takip etmeyenler</h1>
+        <p>Takip ettiğin ama seni takip etmeyen hesapları tek listede gösterir. İstersen seçtiklerini yavaşça takipten çıkarır.</p>
+        <div class="copy-row">
+          <button type="button" class="copy-big" data-go="takip">Kopyala ve x.com'u aç</button>
+          <button type="button" class="copy-plain" data-copy="takip">Sadece kopyala</button>
+        </div>
+        <span class="meta" data-meta="takip">yükleniyor…</span>
+      </div>
+
+      <div>
+        <h2>Nasıl kullanılır</h2>
+        <ol class="steps" data-steps="takip">
+          <li><span>Bilgisayarda <a href="https://x.com" target="_blank" rel="noopener">x.com</a>'a giriş yapmış ol.</span></li>
+          <li><span><b>Kopyala ve x.com'u aç</b>'a bas. Kod panoya kopyalanır, x.com yeni sekmede açılır.</span></li>
+          <li data-step-console><span>x.com sekmesinde konsolu aç: <span class="keys" data-keys></span><small data-keys-note></small></span></li>
+          <li><span>Kodu yapıştır, Enter'a bas. Açılan panelde <b>Taramayı başlat</b>'a bas.</span></li>
+        </ol>
+        <p class="done-note" data-done-note="takip" hidden>Kod panoda. Şimdi açılan x.com sekmesinde 3. adımdan devam et.</p>
+      </div>
+
+      <div>
+        <h2>Ne yapar</h2>
+        <ul class="list">
+          <li>Takip ettiğin herkesi kontrol eder, seni takip etmeyenleri listeler.</li>
+          <li>Listede arayabilir, onaylı / korumalı / fotoğrafsız hesapları süzebilirsin.</li>
+          <li>İstersen seçtiklerini takipten çıkarır: her hesap arasında 6–10 saniye, her 10 hesapta 5 dakika mola verir.</li>
+        </ul>
+      </div>
+
+      <div class="warn"><b>Bilmen gereken:</b> Tarama hesabında hiçbir şeyi değiştirmez; takipten çıkarma sadece sen onaylarsan başlar. Çok sayıda hesabı kısa sürede takipten çıkarmak hesabının geçici olarak kısıtlanmasına yol açabilir, varsayılan hızları düşürme.</div>
+    </div>
+
+    <section class="editor" aria-label="x-unfollower.js kodu">
+      <div class="ed-bar">
+        <div class="ed-file">x-unfollower.js <span data-lines="takip"></span></div>
+        <div class="ed-actions">
+          <a class="ed-btn" href="x-unfollower.js" download>İndir</a>
+          <button type="button" class="ed-btn primary" data-copy="takip">Kopyala</button>
+        </div>
+      </div>
+      <pre tabindex="0"><code class="language-javascript" data-code="takip">Kod yükleniyor…</code></pre>
     </section>
   </section>
 
@@ -292,11 +320,16 @@
         <p>Telefon tarayıcılarında konsol yok. Bunun yerine ücretsiz bir "userscript" uygulaması bir kez kurulur. Sonra x.com'u her açtığında sol altta küçük bir düğme çıkar; iki araç da oradan açılır.</p>
         <div class="copy-row">
           <a class="copy-big" href="x-araclari.user.js">Telefona yükle</a>
-          <span class="meta" data-meta="telefon">iki araç tek dosyada</span>
         </div>
+        <span class="meta" data-meta="telefon">iki araç tek dosyada</span>
       </div>
 
-      <div>
+      <div class="os-switch" role="group" aria-label="Telefonun">
+        <button type="button" data-os="ios" aria-pressed="true">iPhone</button>
+        <button type="button" data-os="android" aria-pressed="false">Android</button>
+      </div>
+
+      <div data-os-panel="ios">
         <h2>iPhone (Safari)</h2>
         <ol class="steps">
           <li><span>App Store'dan ücretsiz <b>Userscripts</b> uygulamasını indir.<small>Açık kaynak bir uygulama: <a href="https://github.com/quoid/userscripts" target="_blank" rel="noopener">github.com/quoid/userscripts</a></small></span></li>
@@ -306,7 +339,7 @@
         </ol>
       </div>
 
-      <div>
+      <div data-os-panel="android" hidden>
         <h2>Android (Firefox)</h2>
         <ol class="steps">
           <li><span>Play Store'dan <b>Firefox</b>'u indir.<small>Android'de Chrome userscript desteklemiyor.</small></span></li>
@@ -321,12 +354,11 @@
         <ul class="list">
           <li>Dosyada diğer sekmelerdeki iki kod aynen var, yanında sadece başlatma düğmesi var. Sen düğmeye dokunmadan hiçbir şey çalışmaz.</li>
           <li>Kurduğun uygulama yeni sürümleri kendisi kontrol eder; kodu tekrar yüklemen gerekmez.</li>
-          <li>Düğmeyi o an istemiyorsan menüdeki <b>Düğmeyi gizle</b> ile sayfa yenilenene kadar kaldırabilirsin.</li>
           <li>Aynı dosya bilgisayarda da çalışır (Chrome veya Edge + Tampermonkey); her seferinde konsola yapıştırmak istemeyenler için.</li>
         </ul>
       </div>
 
-      <div class="warn"><b>Deneysel:</b> Telefon yöntemi bilgisayardaki kadar denenmedi. Bir şey çalışmazsa bilgisayardan konsol yöntemini kullan. Ekranda çıkan hata mesajını paylaşırsan düzeltmeye çalışırım.</div>
+      <div class="warn"><b>Deneysel:</b> Telefon yöntemi bilgisayardaki kadar denenmedi. Bir şey çalışmazsa bilgisayardan konsol yöntemini kullan ya da aşağıdan sorunu bildir.</div>
     </div>
 
     <aside class="editor" aria-label="Kurulan dosya">
@@ -340,6 +372,31 @@
     </aside>
   </section>
 
+  <!-- ===================== Sorular ===================== -->
+  <section class="faq" aria-labelledby="faq-title">
+    <h2 id="faq-title">Sık sorulanlar</h2>
+    <details>
+      <summary>Şifremi ya da verilerimi alıyor mu?</summary>
+      <p>Hayır. Kod zaten açık olan x.com sekmende, senin oturumunla çalışır ve sadece x.com ile konuşur. Bu siteye ya da başka bir yere hiçbir şey gönderilmez. Kodun tamamı yukarıda ve GitHub'da açık.</p>
+    </details>
+    <details>
+      <summary>Konsola kod yapıştırmak tehlikeli değil mi?</summary>
+      <p>Genelde öyledir ve tarayıcılar bu yüzden uyarı gösterir: başkasının verdiği bir kodu körü körüne yapıştırmamalısın. Burada kodun tamamını okuyabilir, istersen bilen birine gösterebilirsin. Kod hesabında bir şey değiştirmeden önce her zaman senden onay ister.</p>
+    </details>
+    <details>
+      <summary>Hesabım kısıtlanır mı?</summary>
+      <p>Listeleri okumak, sayfaları elle gezmekten farksızdır ve kod X'in hız sınırlarına uyar. Risk, çok sayıda hesabı kısa sürede takipten çıkarmakta; o yüzden takipten çıkarma yavaş ve molalı yapılır.</p>
+    </details>
+    <details>
+      <summary>Ne kadar sürer?</summary>
+      <p>Takip etmeyenler taraması birkaç bin takipte genelde birkaç dakika sürer. 100 gönderilik bir etkileşim çemberi de birkaç dakika sürer. X sınır koyarsa panel bekler ve kaldığı yerden devam eder.</p>
+    </details>
+    <details>
+      <summary>Hata alırsam ne yapayım?</summary>
+      <p>Önce x.com'u yenileyip kodu tekrar yapıştır. Panel bir sayfa açmanı isterse aynı sekmede o sayfayı aç. Düzelmezse panelde görünen hata satırıyla birlikte <a href="https://github.com/anilcolakk/anilcolakk.github.io/issues" target="_blank" rel="noopener">sorunu bildir</a>.</p>
+    </details>
+  </section>
+
   <footer>
     <p>Kodlar bu sitede durur ve tarayıcında çalışır. Bu siteye ya da başka bir yere hiçbir veri gönderilmez.</p>
     <p>Bilgisayarda Chrome, Edge, Firefox ya da Safari ile çalışır; telefon için <a href="#telefon">Telefonda</a> sekmesine bak. Panellerin dili Türkçe ve İngilizce.</p>
@@ -349,11 +406,37 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
 <script>
   (function () {
-    var FILES = { takip: "x-unfollower.js", rapor: "x-engagement.js", telefon: "x-araclari.user.js" };
+    var FILES = { cember: "x-engagement.js", takip: "x-unfollower.js", telefon: "x-araclari.user.js" };
+    var OLD_HASHES = { rapor: "cember" };
     var sources = {};
     var highlighted = {};
+    var SITE = "https://anilcolakk.github.io";
 
-    // Kodlar ayrı dosyalardan okunur; bu sayfa ile aynı yerde durur.
+    // ---- cihaz ve tarayıcı ----
+    var ua = navigator.userAgent;
+    var isMac = /Mac/.test(navigator.platform || ua) && !/iPhone|iPad/.test(ua);
+    var isFirefox = /Firefox\//.test(ua);
+    var isSafari = /Safari\//.test(ua) && !/Chrome\/|Chromium\/|Edg\//.test(ua);
+    var isPhone = /iPhone|Android.+Mobile|Mobile.+Firefox/.test(ua) || (window.matchMedia && matchMedia("(pointer: coarse)").matches && innerWidth < 700);
+
+    // Konsol kısayolu: kullanılan sistem ve tarayıcıya göre.
+    var k = function (keys) { return keys.map(function (x) { return "<kbd>" + x + "</kbd>"; }).join(" + "); };
+    var keys, note;
+    if (isSafari) {
+      keys = k(["⌥ Option", "⌘ Cmd", "C"]);
+      note = "Safari'de önce Ayarlar → Gelişmiş → \"Web geliştiricileri için özellikleri göster\"i açman gerekir.";
+    } else if (isFirefox) {
+      keys = isMac ? k(["⌥ Option", "⌘ Cmd", "K"]) : k(["Ctrl", "Shift", "K"]);
+      note = "Firefox yapıştırmaya izin vermezse önce allow pasting yazıp Enter'a bas.";
+    } else {
+      keys = isMac ? k(["⌥ Option", "⌘ Cmd", "J"]) : k(["Ctrl", "Shift", "J"]);
+      note = "Ya da F12'ye basıp Console sekmesine geç. Tarayıcı yapıştırmaya izin vermezse önce allow pasting yazıp Enter'a bas.";
+    }
+    document.querySelectorAll("[data-keys]").forEach(function (el) { el.innerHTML = keys; });
+    document.querySelectorAll("[data-keys-note]").forEach(function (el) { el.textContent = note; });
+
+
+    // ---- kodlar ----
     Object.keys(FILES).forEach(function (key) {
       fetch(FILES[key], { cache: "no-cache" })
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
@@ -378,7 +461,7 @@
     function showUserscript(text) {
       var head = text.split("\n(() => {")[0];
       var version = (/@version\s+(\S+)/.exec(text) || [])[1];
-      sources.telefon = head + "\n\n// … ardından iki aracın kodu (Takip etmeyenler ve Etkileşim raporu sekmelerindekiyle aynı)\n// ve x.com'da sol alttaki başlatma düğmesi.\n";
+      sources.telefon = head + "\n\n// … ardından iki aracın kodu (Etkileşim çemberi ve Takip etmeyenler sekmelerindekiyle aynı)\n// ve x.com'da sol alttaki başlatma düğmesi.\n";
       document.querySelector('[data-code="telefon"]').textContent = sources.telefon;
       document.querySelector('[data-lines="telefon"]').textContent = "· " + Math.round(new Blob([text]).size / 1024) + " KB";
       if (version) document.querySelector('[data-meta="telefon"]').textContent = "sürüm " + version + " · iki araç tek dosyada";
@@ -393,8 +476,10 @@
       try { window.hljs.highlightElement(document.querySelector('[data-code="' + key + '"]')); } catch (e) {}
     }
 
+    // ---- sekmeler ----
     function show(key, focus) {
-      if (!FILES[key]) key = "takip";
+      key = OLD_HASHES[key] || key;
+      if (!FILES[key]) key = "cember";
       document.querySelectorAll(".tab").forEach(function (tab) {
         var on = tab.getAttribute("data-tab") === key;
         tab.setAttribute("aria-selected", on ? "true" : "false");
@@ -402,55 +487,97 @@
         if (on && focus) tab.focus();
       });
       document.querySelectorAll(".panel").forEach(function (panel) { panel.hidden = panel.id !== key; });
+      document.querySelector("[data-phone-note]").hidden = !isPhone || key === "telefon";
       highlight(key);
     }
-
+    function go(key, focus) {
+      history.replaceState(null, "", "#" + key);
+      show(key, focus);
+    }
     document.querySelectorAll(".tab").forEach(function (tab) {
-      tab.addEventListener("click", function () {
-        var key = tab.getAttribute("data-tab");
-        history.replaceState(null, "", "#" + key);
-        show(key);
-      });
+      tab.addEventListener("click", function () { go(tab.getAttribute("data-tab")); });
       tab.addEventListener("keydown", function (e) {
         if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
         var keys = Object.keys(FILES);
         var i = keys.indexOf(tab.getAttribute("data-tab"));
-        var next = keys[(i + (e.key === "ArrowRight" ? 1 : keys.length - 1)) % keys.length];
-        history.replaceState(null, "", "#" + next);
-        show(next, true);
+        go(keys[(i + (e.key === "ArrowRight" ? 1 : keys.length - 1)) % keys.length], true);
       });
     });
-    window.addEventListener("hashchange", function () { show(location.hash.slice(1)); });
-    show(location.hash.slice(1));
+    window.addEventListener("hashchange", function () {
+      show(location.hash.slice(1));
+      document.querySelector(".tabs").scrollIntoView({ block: "start" });
+    });
+    // Telefondan gelen biri, link belirli bir sekmeyi göstermiyorsa doğrudan telefon kurulumunu görür.
+    show(location.hash.slice(1) || (isPhone ? "telefon" : ""));
 
-    function copy(key, btn) {
-      var idle = btn.textContent;
-      function done(text, ok) {
-        btn.textContent = text;
-        btn.classList.toggle("done", ok);
-        setTimeout(function () { btn.textContent = idle; btn.classList.remove("done"); }, 2200);
-      }
+    // ---- kopyalama ----
+    // Önce eşzamanlı yöntem denenir: ardından x.com yeni sekmede açılınca bu sayfa odağı kaybeder.
+    function copyNow(text) {
+      var area = document.createElement("textarea");
+      area.value = text;
+      area.setAttribute("readonly", "");
+      area.style.cssText = "position:fixed;top:0;left:0;opacity:0;";
+      document.body.appendChild(area);
+      area.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) {}
+      area.remove();
+      return ok;
+    }
+    function flash(btn, text, ok) {
+      if (!btn.dataset.idle) btn.dataset.idle = btn.textContent;
+      btn.textContent = text;
+      btn.classList.toggle("done", ok);
+      clearTimeout(btn._t);
+      btn._t = setTimeout(function () { btn.textContent = btn.dataset.idle; btn.classList.remove("done"); }, 2400);
+    }
+    function copy(key, btn, then) {
       var text = sources[key];
-      if (!text) return done("Kod yükleniyor…", false);
-      function fallback() {
-        var code = document.querySelector('[data-code="' + key + '"]');
-        var range = document.createRange();
-        range.selectNodeContents(code);
-        var sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-        var ok = false;
-        try { ok = document.execCommand("copy"); } catch (e) {}
-        done(ok ? "Kopyalandı ✓" : "Seçildi, Ctrl+C'ye bas", ok);
-      }
+      if (!text) return flash(btn, "Kod yükleniyor…", false);
+      if (copyNow(text)) { flash(btn, "Kopyalandı ✓", true); if (then) then(); return; }
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function () { done("Kopyalandı ✓", true); }, fallback);
+        navigator.clipboard.writeText(text).then(function () { flash(btn, "Kopyalandı ✓", true); if (then) then(); }, function () {
+          flash(btn, "Kopyalanamadı, sağdaki kodu seç", false);
+        });
       } else {
-        fallback();
+        flash(btn, "Kopyalanamadı, sağdaki kodu seç", false);
       }
     }
     document.querySelectorAll("[data-copy]").forEach(function (btn) {
       btn.addEventListener("click", function () { copy(btn.getAttribute("data-copy"), btn); });
+    });
+    document.querySelectorAll("[data-go]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var key = btn.getAttribute("data-go");
+        copy(key, btn, function () {
+          var steps = document.querySelector('[data-steps="' + key + '"]');
+          steps.querySelectorAll("li").forEach(function (li) { li.classList.remove("now"); });
+          steps.querySelector("[data-step-console]").classList.add("now");
+          document.querySelector('[data-done-note="' + key + '"]').hidden = false;
+        });
+        window.open("https://x.com/home", "_blank", "noopener");
+      });
+    });
+
+    // ---- telefon seçimi ----
+    function pickOS(os) {
+      document.querySelectorAll("[data-os]").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-os") === os ? "true" : "false"); });
+      document.querySelectorAll("[data-os-panel]").forEach(function (p) { p.hidden = p.getAttribute("data-os-panel") !== os; });
+    }
+    document.querySelectorAll("[data-os]").forEach(function (b) {
+      b.addEventListener("click", function () { pickOS(b.getAttribute("data-os")); });
+    });
+    pickOS(/Android/.test(ua) ? "android" : "ios");
+
+    // ---- paylaş ----
+    document.querySelector("[data-share]").addEventListener("click", function () {
+      var text = "X'te seni geri takip etmeyenleri ve en çok etkileştiğin kişileri gösteren ücretsiz araçlar. Şifre ya da uygulama yok:";
+      var url = "https://x.com/intent/post?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(SITE);
+      if (navigator.share && isPhone) {
+        navigator.share({ title: "X araçları", text: text, url: SITE }).catch(function () {});
+      } else {
+        window.open(url, "_blank", "noopener,width=600,height=520");
+      }
     });
   })();
 </script>

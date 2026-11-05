@@ -5,8 +5,8 @@ window.__xaLauncher = true;
 
 const tr = /^tr/i.test(navigator.language || "");
 const L = tr
-  ? { open: "X araçları", unfollower: "Takip etmeyenler", engagement: "Etkileşim raporu", hide: "Düğmeyi gizle" }
-  : { open: "X tools", unfollower: "Unfollowers", engagement: "Engagement report", hide: "Hide button" };
+  ? { open: "X araçları", unfollower: "Takip etmeyenler", engagement: "Etkileşim çemberi", hide: "Düğmeyi gizle" }
+  : { open: "X tools", unfollower: "Unfollowers", engagement: "Engagement circle", hide: "Hide button" };
 
 const css = `
 #xa-launch, #xa-launch * { box-sizing: border-box; }

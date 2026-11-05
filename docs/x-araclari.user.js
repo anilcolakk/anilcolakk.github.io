@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         X araçları
 // @namespace    https://anilcolakk.github.io
-// @version      2026.1105.2245
+// @version      2026.1105.2304
 // @description  Takip etmeyenler ve etkileşim raporu. x.com'da sol alttaki düğmeden açılır. / Unfollowers and engagement report for X.
 // @author       anilcolakk
 // @homepageURL  https://anilcolakk.github.io
@@ -18,7 +18,7 @@
 // ==/UserScript==
 
 // This file holds the two tools from https://anilcolakk.github.io unchanged
-// (x-unfollower.js v1.0.0, x-engagement.js v1.1.2),
+// (x-unfollower.js v1.0.0, x-engagement.js v1.2.0),
 // plus a small button that starts them. Nothing runs until you tap the button.
 
 (() => {
@@ -2232,7 +2232,7 @@
   }
 
   const APP_ID = "xe-app";
-  const VERSION = "1.1.2";
+  const VERSION = "1.2.0";
   const CLEANUP_EVENT = "xe-cleanup";
   const STYLE_ID = "xe-style";
   const STORAGE_KEY = "xe_state_v1";
@@ -2255,13 +2255,13 @@
   };
 
   // Speed settings changed in version 2; older saved speed values are not reused.
-  const SETTINGS_VERSION = 2;
+  const SETTINGS_VERSION = 3;
   const DEFAULT_SETTINGS = {
     tweetCount: 100,
     includeGhosts: true,
     maxListPages: 3,
     maxMentionPages: 3,
-    maxFollowers: 3000,
+    maxFollowers: 10000,
     requestDelayMin: 500,
     requestDelayMax: 1100,
     pauseEveryRequests: 60,
@@ -2351,7 +2351,7 @@
       ghostsOff: "Ghost followers were not included in this report. Turn the option on before building the next one.",
       ghostsPartial: "Ghost followers appear once the report finishes.",
       ghostsNoLikes: "Ghost followers need the list of who liked your posts. X did not give it for this report{code}, so everyone would look like a ghost; they are left out.",
-      ghostsNoFollowers: "X did not give your follower list{code}, so this report has no ghost followers. Open your Followers page once in this tab, then build a new report.",
+      ghostsNoFollowers: "X did not give your follower list{code}, so this report has no ghost followers. Try a new report a little later.",
       ghostsLost: "The follower list of this report could not be saved in the browser. Build a new report to see ghost followers.",
       ghostsCapped: "Your newest {count} followers were checked. Raise the limit in Settings to check more.",
       coverageNote: "X showed {percent}% of the likes on these posts, so a few people listed as ghosts may have liked something.",
@@ -2508,7 +2508,7 @@
       ghostsOff: "Bu raporda hayalet takipçiler yok. Bir sonraki raporda seçeneği açman yeterli.",
       ghostsPartial: "Hayalet takipçiler rapor bitince görünür.",
       ghostsNoLikes: "Hayaletleri bulmak için gönderilerini kimin beğendiğini bilmek gerekiyor. X bu raporda bu listeyi vermedi{code}; herkes hayalet görünürdü, o yüzden hayaletler çıkarılmadı.",
-      ghostsNoFollowers: "X takipçi listeni vermedi{code}, bu yüzden bu raporda hayalet yok. Bu sekmede Takipçiler sayfanı bir kez açıp yeni rapor oluştur.",
+      ghostsNoFollowers: "X takipçi listeni vermedi{code}, bu yüzden bu raporda hayalet yok. Biraz sonra yeni bir rapor oluşturmayı dene.",
       ghostsLost: "Bu raporun takipçi listesi tarayıcıya kaydedilemedi. Hayaletleri görmek için yeni rapor oluştur.",
       ghostsCapped: "En yeni {count} takipçin kontrol edildi. Daha fazlası için Ayarlar'dan sınırı artırabilirsin.",
       coverageNote: "X bu gönderilerdeki beğenilerin %{percent} kadarını gösterdi; hayalet görünen birkaç kişi aslında bir şey beğenmiş olabilir.",
@@ -2738,6 +2738,7 @@
       followersCapped: false,
       followersLost: false,
       followersPageSize: 100,
+      followersSource: "rest",
       ghostsReason: "",
       failed: {},
       viewer: null,
@@ -3394,13 +3395,25 @@
         throw error;
       }
     }
+    await afterRequest();
+    return json;
+  }
+
+  // A paced call to X's older REST API (/i/api/1.1/...), which the web app still uses.
+  async function restGet(path, params, key) {
+    await takeTurn();
+    const json = await xFetch(`${location.origin}/i/api/1.1/${path}?${new URLSearchParams(params)}`, key);
+    await afterRequest();
+    return json;
+  }
+
+  async function afterRequest() {
     state.requestCount += 1;
     if (state.settings.pauseEveryRequests > 0 && state.requestCount % state.settings.pauseEveryRequests === 0) {
       const jitter = Math.random() * PAUSE_JITTER_MS * 2 - PAUSE_JITTER_MS;
       pauseUntil = Date.now() + Math.max(0, state.settings.pauseMs + jitter);
     }
     await sleepWithCountdown(randomBetween(state.settings.requestDelayMin, state.settings.requestDelayMax), "waitPause");
-    return json;
   }
 
   // ---------- response parsing ----------
@@ -3453,6 +3466,29 @@
       verified: Boolean(result.is_blue_verified || result.verification?.verified || legacy.verified)
     };
     return user.id && user.username ? user : null;
+  }
+
+  function normalizeRestUser(raw) {
+    const id = String(raw?.id_str || raw?.id || "");
+    const username = String(raw?.screen_name || "");
+    if (!id || !username) return null;
+    return {
+      id,
+      username,
+      name: String(raw.name || ""),
+      avatar: String(raw.profile_image_url_https || ""),
+      followers: Number(raw.followers_count) || 0,
+      verified: Boolean(raw.verified || raw.ext_is_blue_verified || raw.is_blue_verified)
+    };
+  }
+
+  // followers/list.json: up to 200 users per page; cursor "0" means the end.
+  function parseRestUsers(json) {
+    if (!json || !Array.isArray(json.users)) {
+      throw xError("format", t("apiChanged"), 200, `no users in reply (${Object.keys(json || {}).join(", ").slice(0, 80)})`);
+    }
+    const next = String(json.next_cursor_str || "");
+    return { users: json.users.map(normalizeRestUser).filter(Boolean), nextCursor: next && next !== "0" ? next : "" };
   }
 
   function parseUserTimeline(json) {
@@ -3645,10 +3681,9 @@
 
   // ---------- scan ----------
 
-  function requiredOps(report) {
-    const ops = ["UserTweets", "Favoriters", "Retweeters", "TweetDetail"];
-    if (report.includeGhosts) ops.push("Followers");
-    return ops;
+  // The follower list comes from X's REST API (see loadFollowers), so it needs no query id.
+  function requiredOps() {
+    return ["UserTweets", "Favoriters", "Retweeters", "TweetDetail"];
   }
 
   // Errors that mean X refused or changed one kind of request. A side step that hits
@@ -3716,9 +3751,9 @@
       if (halted()) return stopScan(report);
       report.skipped = LIST_STEPS.map((step) => step.op).filter((op) => !state.api.ops[op]);
       // Without likes or the follower list, a ghost list would be wrong, so leave it out.
-      if (report.includeGhosts && (!state.api.ops.Favoriters || !state.api.ops.Followers)) {
+      if (report.includeGhosts && !state.api.ops.Favoriters) {
         report.includeGhosts = false;
-        report.ghostsReason = state.api.ops.Favoriters ? "followers" : "likes";
+        report.ghostsReason = "likes";
       }
 
       if (!report.tweetsDone) {
@@ -4021,19 +4056,39 @@
     updateEngagementProgress(report);
     while (true) {
       if (halted() || !report.includeGhosts) return;
-      let json;
-      try {
-        json = await apiGet("Followers", { userId: String(viewerId), count: report.followersPageSize || 100, includePromotedContent: false, cursor });
-      } catch (error) {
-        // If X refuses the larger page size, fall back to its usual 50.
-        if (["http", "format"].includes(error?.kind) && (report.followersPageSize || 100) > 50) {
-          report.followersPageSize = 50;
-          continue;
+      let page;
+      if (report.followersSource !== "graphql") {
+        // X answers its GraphQL Followers request only from its own app (404 otherwise),
+        // but the REST list works with the normal session and gives 200 people per page.
+        try {
+          page = parseRestUsers(await restGet("followers/list.json", {
+            user_id: String(viewerId), count: "200", cursor: cursor || "-1", skip_status: "true", include_user_entities: "false"
+          }, "followers/list"));
+        } catch (error) {
+          if (SOFT_ERRORS.includes(error?.kind) && !report.followers.length && state.api?.ops?.Followers) {
+            console.warn("[xe] REST follower list refused, trying GraphQL Followers", error);
+            report.followersSource = "graphql";
+            cursor = "";
+            continue;
+          }
+          throw error;
         }
-        throw error;
+      } else {
+        let json;
+        try {
+          json = await apiGet("Followers", { userId: String(viewerId), count: report.followersPageSize || 100, includePromotedContent: false, cursor });
+        } catch (error) {
+          // If X refuses the larger page size, fall back to its usual 50.
+          if (["http", "format"].includes(error?.kind) && (report.followersPageSize || 100) > 50) {
+            report.followersPageSize = 50;
+            continue;
+          }
+          throw error;
+        }
+        page = parseUserTimeline(json);
       }
       if (halted()) return;
-      const { users, nextCursor } = parseUserTimeline(json);
+      const { users, nextCursor } = page;
       for (const user of users) {
         if (known.has(user.id) || report.followers.length >= cap) continue;
         known.add(user.id);
@@ -5560,8 +5615,8 @@
 
   const tr = /^tr/i.test(navigator.language || "");
   const L = tr
-    ? { open: "X araçları", unfollower: "Takip etmeyenler", engagement: "Etkileşim raporu", hide: "Düğmeyi gizle" }
-    : { open: "X tools", unfollower: "Unfollowers", engagement: "Engagement report", hide: "Hide button" };
+    ? { open: "X araçları", unfollower: "Takip etmeyenler", engagement: "Etkileşim çemberi", hide: "Düğmeyi gizle" }
+    : { open: "X tools", unfollower: "Unfollowers", engagement: "Engagement circle", hide: "Hide button" };
 
   const css = `
   #xa-launch, #xa-launch * { box-sizing: border-box; }
