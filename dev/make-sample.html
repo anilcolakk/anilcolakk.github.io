@@ -1,0 +1,48 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Sample circle</title>
+<body style="margin:0;background:#222;color:#eee;font:14px sans-serif">
+<p id="status">drawing…</p>
+<canvas id="c" style="width:400px"></canvas>
+<script>
+  // Draws the sample circle for the website with made-up names, then saves it
+  // through dev/save-server.py (POST /save). Not part of the tools.
+  window.__XE_TEST__ = (api) => { window.xe = api; };
+</script>
+<script src="../x-engagement.js"></script>
+<script>
+  const api = window.xe;
+  api.state.language = "tr";
+  const names = ["ornek_ayse", "ornek_mert", "ornek_zeynep", "ornek_burak", "ornek_selin"];
+  for (let i = names.length; i < 30; i += 1) names.push("ornek_" + (i + 1));
+  function fakeAvatar(i) {
+    const c = document.createElement("canvas");
+    c.width = c.height = 160;
+    const g = c.getContext("2d");
+    g.fillStyle = `hsl(${(i * 47 + 200) % 360},45%,52%)`;
+    g.fillRect(0, 0, 160, 160);
+    g.fillStyle = "rgba(255,255,255,.85)";
+    g.beginPath(); g.arc(80, 64, 30, 0, 7); g.fill();
+    g.beginPath(); g.arc(80, 164, 60, 0, 7); g.fill();
+    return c;
+  }
+  const fans = names.map((n, i) => ({ id: String(i), username: n, l: 40 - i, r: 0, c: 0 }));
+  api.state.hidden = new Set(["3"]);
+  api.state.hideMode = "blur";
+  const drawn = api.circleFans(fans);
+  const canvas = document.getElementById("c");
+  canvas.width = api.CIRCLE_W;
+  canvas.height = api.CIRCLE_H;
+  const view = { tweets: new Array(100), report: { finishedAt: Date.now() } };
+  api.drawCircle(canvas, view, { username: "senin_hesabin" }, drawn, [fakeAvatar(99), ...drawn.map((_, i) => fakeAvatar(i))]);
+  // Scaled to 800 px wide JPEG so the page stays light.
+  const small = document.createElement("canvas");
+  small.width = 800;
+  small.height = Math.round(api.CIRCLE_H * 800 / api.CIRCLE_W);
+  const sg = small.getContext("2d");
+  sg.imageSmoothingQuality = "high";
+  sg.drawImage(canvas, 0, 0, small.width, small.height);
+  small.toBlob((blob) => fetch("/save", { method: "POST", body: blob })
+    .then((r) => { document.getElementById("status").textContent = r.ok ? "saved" : "save failed " + r.status; }), "image/jpeg", 0.86);
+</script>
+</body>

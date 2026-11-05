@@ -1,0 +1,47 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Circle preview</title>
+<body style="margin:0;background:#222;color:#eee;font:14px sans-serif;display:flex;gap:16px;padding:16px;align-items:flex-start;flex-wrap:wrap">
+<div><p>Anonim (2 ve 4 gizli)</p><canvas id="blur" style="width:360px"></canvas></div>
+<div><p>Tamamen çıkar (2 ve 4 gizli)</p><canvas id="remove" style="width:360px"></canvas></div>
+<div id="xe-app" style="position:static"><div class="xe-panel" style="position:static;width:420px"><div class="xe-body"><div class="xe-tab-body" data-tab-body style="max-height:none"></div></div></div></div>
+<script>
+  // Loads x-engagement.js in test mode and draws the circle with sample people.
+  window.__XE_TEST__ = (api) => { window.xe = api; };
+</script>
+<script src="../x-engagement.js"></script>
+<script>
+  const api = window.xe;
+  api.state.language = "tr";
+  const style = document.createElement("style");
+  style.textContent = api.CSS;
+  document.head.appendChild(style);
+  const names = ["aylin_k", "mertdev", "zeynep.codes", "burak", "selin_yilmaz_uzun_isim", "emre", "deniz", "ece", "can", "ayse",
+    "kaan", "elif", "onur", "irem", "tolga", "naz", "berk", "gizem", "umut", "sena", "arda", "melis", "cem", "pelin", "efe", "duru", "alp", "ceren", "ozan", "derin", "yeni1", "yeni2"];
+  function fakeAvatar(i) {
+    const c = document.createElement("canvas");
+    c.width = c.height = 80;
+    const g = c.getContext("2d");
+    g.fillStyle = `hsl(${i * 37 % 360},60%,55%)`;
+    g.fillRect(0, 0, 80, 80);
+    g.fillStyle = "rgba(255,255,255,.85)";
+    g.beginPath(); g.arc(40, 32, 15, 0, 7); g.fill();
+    g.beginPath(); g.arc(40, 82, 30, 0, 7); g.fill();
+    return c;
+  }
+  const fans = names.map((n, i) => ({ id: String(i), username: n, avatar: fakeAvatar(i).toDataURL(), l: 40 - i, r: 0, c: 0 }));
+  const avatars = new Map(fans.map((f, i) => [f.id, fakeAvatar(i)]));
+  const view = { tweets: new Array(100), fans, report: { viewerId: "1", finishedAt: Date.now(), index: 1, people: {} } };
+  api.state.hidden = new Set(["1", "3"]);
+  for (const mode of ["blur", "remove"]) {
+    api.state.hideMode = mode;
+    const drawn = api.circleFans(fans);
+    const canvas = document.getElementById(mode);
+    canvas.width = api.CIRCLE_W;
+    canvas.height = api.CIRCLE_H;
+    api.drawCircle(canvas, view, { username: "anilcolak" }, drawn, [fakeAvatar(99), ...drawn.map((f) => avatars.get(f.id))]);
+  }
+  api.state.hideMode = "blur";
+  document.querySelector("[data-tab-body]").innerHTML = api.renderCircleTab(view);
+</script>
+</body>

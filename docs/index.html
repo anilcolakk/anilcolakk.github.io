@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>X araçları — takip etmeyenler ve etkileşim raporu</title>
+<meta name="description" content="X (Twitter) için iki küçük araç: seni geri takip etmeyenleri bul, kimin en çok etkileştiğini gör. Uygulama, eklenti veya şifre yok; kodu tarayıcı konsoluna yapıştırıyorsun.">
+<meta property="og:title" content="X araçları">
+<meta property="og:description" content="Seni geri takip etmeyenleri bul, en çok etkileşenlerini gör. Uygulama, eklenti, şifre yok.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#f7f6f2">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg: #f7f6f2;
+    --fg: #16181c;
+    --muted: #5b6168;
+    --line: #dedcd4;
+    --surface: #ffffff;
+    --accent: #1d6fd8;
+    --step: #16181c;
+    --warn-bg: #fff6dc;
+    --warn-line: #ecd28a;
+    --warn-fg: #5f4600;
+    --ed-bg: #11161d;
+    --ed-bar: #181f29;
+    --ed-line: #26303d;
+    --ed-fg: #d8e0ea;
+    --ed-muted: #7f8b9b;
+    --sans: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1114; --fg: #e8e9eb; --muted: #9aa1aa; --line: #262a30; --surface: #16191d;
+      --accent: #5aa2ff; --step: #e8e9eb; --warn-bg: #2a2412; --warn-line: #5c4c1c; --warn-fg: #f1d68f;
+      --ed-bg: #0b0e12; --ed-bar: #12161c; --ed-line: #1f2630;
+      color-scheme: dark;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.6 var(--sans); }
+  a { color: var(--accent); }
+  p, ul, ol, h1, h2, h3 { margin: 0; }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 20px; }
+
+  .top { padding: 36px 0 22px; display: flex; flex-direction: column; gap: 10px; }
+  .brand { font: 600 15px var(--mono); letter-spacing: -0.01em; color: var(--fg); text-decoration: none; align-self: flex-start; }
+  .brand span { color: var(--muted); font-weight: 400; }
+  .lead { font-size: 19px; max-width: 640px; color: var(--fg); }
+  .lead b { font-weight: 600; }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--muted); font: 13px var(--mono); }
+  .badges span::before { content: "✓ "; color: #12a56b; }
+
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    appearance: none; border: 0; background: none; color: var(--muted);
+    font: 600 15px var(--sans); padding: 12px 16px 11px; cursor: pointer;
+    border-bottom: 3px solid transparent; margin-bottom: -1px; white-space: nowrap;
+  }
+  .tab:hover { color: var(--fg); }
+  .tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--fg); }
+
+  .panel { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 26px 0 40px; }
+  .panel[hidden] { display: none; }
+  @media (min-width: 1000px) {
+    .panel { grid-template-columns: minmax(0, 460px) minmax(0, 1fr); align-items: start; gap: 32px; }
+    .editor { position: sticky; top: 20px; height: calc(100vh - 40px); }
+  }
+  .info { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+
+  h1 { font-size: 30px; line-height: 1.2; font-weight: 700; letter-spacing: -0.01em; }
+  .intro { display: flex; flex-direction: column; gap: 12px; }
+  .intro p { color: var(--muted); font-size: 17px; }
+  .copy-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 4px; }
+  .copy-big {
+    font: 600 16px var(--sans); color: var(--bg); background: var(--fg);
+    border: 0; border-radius: 10px; padding: 12px 22px; cursor: pointer;
+  }
+  .copy-big:hover { opacity: 0.88; }
+  .copy-big.done { background: #12a56b; color: #fff; }
+  .meta { color: var(--muted); font: 13px var(--mono); }
+
+  h2 { font-size: 17px; font-weight: 600; margin-bottom: 10px; }
+  .steps { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px; counter-reset: s; }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 26px 1fr; gap: 12px; }
+  .steps li::before {
+    content: counter(s); width: 26px; height: 26px; margin-top: 1px; display: grid; place-items: center;
+    border: 1.5px solid var(--step); border-radius: 50%; font: 600 13px var(--mono);
+  }
+  .steps small { display: block; color: var(--muted); font-size: 14px; }
+  .list { padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+  .list li::marker { color: var(--muted); }
+  .muted { color: var(--muted); font-size: 15px; }
+  .shot { margin-top: 12px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: #08111f; }
+  .shot img { display: block; width: 100%; height: auto; }
+  .shot figcaption { padding: 8px 12px; font-size: 13px; color: var(--muted); background: var(--surface); border-top: 1px solid var(--line); }
+  .warn {
+    background: var(--warn-bg); border: 1px solid var(--warn-line); color: var(--warn-fg);
+    border-radius: 10px; padding: 14px 16px; font-size: 15px;
+  }
+  .warn b { color: var(--fg); }
+  code, kbd {
+    font-family: var(--mono); font-size: 0.86em; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px;
+  }
+
+  .editor {
+    min-width: 0; display: flex; flex-direction: column; background: var(--ed-bg);
+    border: 1px solid var(--ed-line); border-radius: 12px; overflow: hidden; height: 70vh;
+  }
+  .ed-bar {
+    flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 9px 10px 9px 16px; background: var(--ed-bar); border-bottom: 1px solid var(--ed-line);
+  }
+  .ed-file { min-width: 0; color: var(--ed-fg); font: 500 13px var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ed-file span { color: var(--ed-muted); }
+  .ed-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .ed-btn {
+    font: 600 13px var(--sans); color: var(--ed-fg); background: transparent; text-decoration: none;
+    border: 1px solid var(--ed-line); border-radius: 7px; padding: 6px 12px; cursor: pointer;
+  }
+  .ed-btn:hover { background: rgba(255,255,255,0.06); }
+  .ed-btn.primary { background: #2f7cf6; border-color: #2f7cf6; color: #fff; }
+  .ed-btn.primary:hover { background: #4a8ff8; }
+  .ed-btn.done { background: #15a46a; border-color: #15a46a; color: #fff; }
+  pre { flex: 1 1 auto; min-height: 0; margin: 0; overflow: auto; padding: 14px 16px 24px; font: 12.5px/1.6 var(--mono); color: var(--ed-fg); tab-size: 2; }
+  pre code { background: none; border: 0; padding: 0; font: inherit; color: inherit; }
+  .hljs-keyword, .hljs-literal { color: #ff7ab2; }
+  .hljs-string, .hljs-regexp { color: #9be08a; }
+  .hljs-template-variable, .hljs-subst { color: #ffd479; }
+  .hljs-number { color: #ffb86b; }
+  .hljs-comment { color: #6b7b96; font-style: italic; }
+  .hljs-title, .hljs-title.function_ { color: #7cc4ff; }
+  .hljs-built_in, .hljs-type { color: #c49bff; }
+  .hljs-attr, .hljs-property { color: #8fd6e8; }
+
+  footer { border-top: 1px solid var(--line); padding: 20px 0 40px; color: var(--muted); font-size: 14px; display: flex; flex-direction: column; gap: 6px; }
+
+  button:focus-visible, a:focus-visible, pre:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (max-width: 600px) {
+    .top { padding-top: 24px; }
+    .lead { font-size: 17px; }
+    h1 { font-size: 25px; }
+    .editor { height: 60vh; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="./">x araçları<span> / konsol için</span></a>
+    <p class="lead">X (Twitter) için iki küçük araç. Bir kodu kopyalayıp x.com'da tarayıcının konsoluna yapıştırıyorsun, o kadar. <b>Uygulama, eklenti ya da şifre yok.</b></p>
+    <div class="badges"><span>ücretsiz</span><span>giriş istemez</span><span>veri bir yere gitmez</span><span>kod açık</span></div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Araçlar">
+    <button class="tab" role="tab" id="tab-takip" aria-controls="takip" aria-selected="true" data-tab="takip">Takip etmeyenler</button>
+    <button class="tab" role="tab" id="tab-rapor" aria-controls="rapor" aria-selected="false" data-tab="rapor">Etkileşim raporu</button>
+  </nav>
+
+  <!-- ===================== Takip etmeyenler ===================== -->
+  <section class="panel" id="takip" role="tabpanel" aria-labelledby="tab-takip">
+    <div class="info">
+      <div class="intro">
+        <h1>Seni geri takip etmeyenler</h1>
+        <p>Takip ettiğin ama seni takip etmeyen hesapları tek listede gösterir. İstersen seçtiklerini yavaşça takipten çıkarır.</p>
+        <div class="copy-row">
+          <button type="button" class="copy-big" data-copy="takip">Kodu kopyala</button>
+          <span class="meta" data-meta="takip">yükleniyor…</span>
+        </div>
+      </div>
+
+      <div>
+        <h2>Nasıl kullanılır</h2>
+        <ol class="steps">
+          <li><span>Bilgisayarda <a href="https://x.com" target="_blank" rel="noopener">x.com</a>'u aç ve hesabına giriş yap.</span></li>
+          <li><span>Bu sayfada <b>Kodu kopyala</b>'ya bas.</span></li>
+          <li><span>x.com sekmesinde <kbd>F12</kbd>'ye bas ve <b>Console</b> sekmesine geç.<small>Mac'te <kbd>Cmd</kbd> + <kbd>Option</kbd> + <kbd>J</kbd>. Chrome yapıştırmaya izin vermezse önce <code>allow pasting</code> yazıp Enter'a bas.</small></span></li>
+          <li><span>Kodu yapıştır ve Enter'a bas. Sağ altta bir panel açılır, <b>Taramayı başlat</b>'a bas.</span></li>
+        </ol>
+      </div>
+
+      <div>
+        <h2>Ne yapar</h2>
+        <ul class="list">
+          <li>Takip ettiğin herkesi kontrol eder, seni takip etmeyenleri listeler.</li>
+          <li>Listede arayabilir, onaylı / korumalı / fotoğrafsız hesapları süzebilirsin.</li>
+          <li>İstersen seçtiklerini takipten çıkarır: her hesap arasında 6–10 saniye, her 10 hesapta 5 dakika mola verir.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2>Güvenli mi?</h2>
+        <ul class="list">
+          <li>Şifreni istemez. Zaten açık olan X oturumunu kullanır, sadece x.com ile konuşur.</li>
+          <li>X'in hız sınırına yaklaşınca kendiliğinden bekler. Yarıda kalırsa kaldığı yerden devam eder.</li>
+          <li>Tarama hesabında hiçbir şeyi değiştirmez. Takipten çıkarma sadece sen onaylarsan başlar.</li>
+        </ul>
+      </div>
+
+      <div class="warn"><b>Bilmen gereken:</b> Kod X'in resmi olmayan web arayüzünü kullanır. Çok sayıda hesabı kısa sürede takipten çıkarmak hesabının geçici olarak kısıtlanmasına yol açabilir; varsayılan hızları düşürme. Konsola okumadığın bir kodu yapıştırma: bu kodun tamamı sağda.</div>
+    </div>
+
+    <section class="editor" aria-label="x-unfollower.js kodu">
+      <div class="ed-bar">
+        <div class="ed-file">x-unfollower.js <span data-lines="takip"></span></div>
+        <div class="ed-actions">
+          <a class="ed-btn" href="x-unfollower.js" download>İndir</a>
+          <button type="button" class="ed-btn primary" data-copy="takip">Kopyala</button>
+        </div>
+      </div>
+      <pre tabindex="0"><code class="language-javascript" data-code="takip">Kod yükleniyor…</code></pre>
+    </section>
+  </section>
+
+  <!-- ===================== Etkileşim raporu ===================== -->
+  <section class="panel" id="rapor" role="tabpanel" aria-labelledby="tab-rapor" hidden>
+    <div class="info">
+      <div class="intro">
+        <h1>Etkileşim raporu ve X çemberin</h1>
+        <p>Son gönderilerinle en çok kimin etkileştiğini bulur, bunu paylaşmalık bir çember görseline çevirir. Hiç etkileşmeyen takipçilerini ve en iyi paylaşım saatini de gösterir.</p>
+        <div class="copy-row">
+          <button type="button" class="copy-big" data-copy="rapor">Kodu kopyala</button>
+          <span class="meta" data-meta="rapor">yükleniyor…</span>
+        </div>
+      </div>
+
+      <div>
+        <h2>Nasıl kullanılır</h2>
+        <ol class="steps">
+          <li><span>Bilgisayarda <a href="https://x.com" target="_blank" rel="noopener">x.com</a>'u aç ve hesabına giriş yap.</span></li>
+          <li><span>Bu sayfada <b>Kodu kopyala</b>'ya bas.</span></li>
+          <li><span>x.com sekmesinde <kbd>F12</kbd>'ye bas ve <b>Console</b> sekmesine geç.<small>Mac'te <kbd>Cmd</kbd> + <kbd>Option</kbd> + <kbd>J</kbd>. Chrome yapıştırmaya izin vermezse önce <code>allow pasting</code> yazıp Enter'a bas.</small></span></li>
+          <li><span>Kodu yapıştır ve Enter'a bas. Açılan panelde kaç gönderiye bakılacağını seç ve <b>Raporu oluştur</b>'a bas.<small>Panel "Bir adım gerekiyor" derse, söylediği sayfayı aynı sekmede aç; kendiliğinden devam eder.</small></span></li>
+        </ol>
+      </div>
+
+      <div>
+        <h2>Ne yapar</h2>
+        <ul class="list">
+          <li><b>Çember:</b> Ortada sen, en içte en çok etkileşen 5 kişi, dışa doğru sonraki 10 ve 15 kişi. Tek tuşla gönderi olarak paylaşılır. Göstermek istemediğin kişileri gizleyebilirsin.</li>
+          <li><b>Hayranlar:</b> Kim kaç kez beğenmiş, yeniden göndermiş, yanıtlamış, alıntılamış ya da senden bahsetmiş. Alıntı ve bahsetme, beğeniden daha çok puan alır.</li>
+          <li><b>Hayaletler:</b> Seni takip edip gönderilerine hiç dokunmayan takipçiler.</li>
+          <li><b>Gönderiler:</b> Görüntülenme, etkileşim oranı, en iyi saat ve gün.</li>
+        </ul>
+        <figure class="shot">
+          <img src="cember-ornek.jpg" alt="Örnek X çemberi: ortada profil fotoğrafı, etrafında üç halka halinde en çok etkileşen 30 kişi" width="800" height="960" loading="lazy">
+          <figcaption>Örnek çember (isimler ve fotoğraflar uydurma).</figcaption>
+        </figure>
+      </div>
+
+      <div>
+        <h2>Güvenli mi?</h2>
+        <ul class="list">
+          <li>Sadece okur. Hesabında hiçbir şeyi değiştirmez, kimseyi takip etmez ya da beğenmez.</li>
+          <li>Şifreni istemez, sadece x.com ile konuşur. Paylaş düğmesi gönderiyi hazırlar, gönder tuşuna sen basarsın.</li>
+          <li>X'in hız sınırlarına uyar, gerekirse bekler. 100 gönderilik bir rapor genelde birkaç dakika sürer.</li>
+        </ul>
+      </div>
+
+      <div class="warn"><b>Bilmen gereken:</b> X beğenileri gizli tuttuğu için sadece kendi gönderilerini kimin beğendiğini görebilirsin. Kod X'in resmi olmayan web arayüzünü kullanır; X bir şeyi değiştirirse bir kısmı çalışmayabilir.</div>
+    </div>
+
+    <section class="editor" aria-label="x-engagement.js kodu">
+      <div class="ed-bar">
+        <div class="ed-file">x-engagement.js <span data-lines="rapor"></span></div>
+        <div class="ed-actions">
+          <a class="ed-btn" href="x-engagement.js" download>İndir</a>
+          <button type="button" class="ed-btn primary" data-copy="rapor">Kopyala</button>
+        </div>
+      </div>
+      <pre tabindex="0"><code class="language-javascript" data-code="rapor">Kod yükleniyor…</code></pre>
+    </section>
+  </section>
+
+  <footer>
+    <p>Kodlar bu sitede durur ve tarayıcında çalışır. Bu siteye ya da başka bir yere hiçbir veri gönderilmez.</p>
+    <p>Telefonda çalışmaz; bilgisayarda Chrome, Edge, Firefox ya da Safari gerekir. Panellerin dili Türkçe ve İngilizce.</p>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+<script>
+  (function () {
+    var FILES = { takip: "x-unfollower.js", rapor: "x-engagement.js" };
+    var sources = {};
+    var highlighted = {};
+
+    // Kodlar ayrı dosyalardan okunur; bu sayfa ile aynı yerde durur.
+    Object.keys(FILES).forEach(function (key) {
+      fetch(FILES[key], { cache: "no-cache" })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+        .then(function (text) {
+          sources[key] = text;
+          var version = (/const VERSION = "([^"]+)"/.exec(text) || [])[1];
+          var lines = text.split("\n").length.toLocaleString("tr-TR");
+          var kb = Math.round(new Blob([text]).size / 1024);
+          document.querySelector('[data-code="' + key + '"]').textContent = text;
+          document.querySelector('[data-lines="' + key + '"]').textContent = "· " + lines + " satır";
+          document.querySelector('[data-meta="' + key + '"]').textContent = (version ? "v" + version + " · " : "") + lines + " satır · " + kb + " KB";
+          if (!document.getElementById(key).hidden) highlight(key);
+        })
+        .catch(function () {
+          document.querySelector('[data-code="' + key + '"]').textContent = "Kod yüklenemedi. Sayfayı yenile ya da " + FILES[key] + " dosyasını indir.";
+          document.querySelector('[data-meta="' + key + '"]').textContent = "";
+        });
+    });
+
+    // Renklendirme büyük kodda biraz sürer; sadece açık sekme için yapılır.
+    function highlight(key) {
+      if (highlighted[key] || !sources[key]) return;
+      if (!window.hljs) { window.addEventListener("load", function () { highlight(key); }, { once: true }); return; }
+      highlighted[key] = true;
+      try { window.hljs.highlightElement(document.querySelector('[data-code="' + key + '"]')); } catch (e) {}
+    }
+
+    function show(key, focus) {
+      if (!FILES[key]) key = "takip";
+      document.querySelectorAll(".tab").forEach(function (tab) {
+        var on = tab.getAttribute("data-tab") === key;
+        tab.setAttribute("aria-selected", on ? "true" : "false");
+        tab.tabIndex = on ? 0 : -1;
+        if (on && focus) tab.focus();
+      });
+      document.querySelectorAll(".panel").forEach(function (panel) { panel.hidden = panel.id !== key; });
+      highlight(key);
+    }
+
+    document.querySelectorAll(".tab").forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        var key = tab.getAttribute("data-tab");
+        history.replaceState(null, "", "#" + key);
+        show(key);
+      });
+      tab.addEventListener("keydown", function (e) {
+        if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+        var next = tab.getAttribute("data-tab") === "takip" ? "rapor" : "takip";
+        history.replaceState(null, "", "#" + next);
+        show(next, true);
+      });
+    });
+    window.addEventListener("hashchange", function () { show(location.hash.slice(1)); });
+    show(location.hash.slice(1));
+
+    function copy(key, btn) {
+      var idle = btn.textContent;
+      function done(text, ok) {
+        btn.textContent = text;
+        btn.classList.toggle("done", ok);
+        setTimeout(function () { btn.textContent = idle; btn.classList.remove("done"); }, 2200);
+      }
+      var text = sources[key];
+      if (!text) return done("Kod yükleniyor…", false);
+      function fallback() {
+        var code = document.querySelector('[data-code="' + key + '"]');
+        var range = document.createRange();
+        range.selectNodeContents(code);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        var ok = false;
+        try { ok = document.execCommand("copy"); } catch (e) {}
+        done(ok ? "Kopyalandı ✓" : "Seçildi, Ctrl+C'ye bas", ok);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done("Kopyalandı ✓", true); }, fallback);
+      } else {
+        fallback();
+      }
+    }
+    document.querySelectorAll("[data-copy]").forEach(function (btn) {
+      btn.addEventListener("click", function () { copy(btn.getAttribute("data-copy"), btn); });
+    });
+  })();
+</script>
+</body>
+</html>
